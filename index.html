@@ -41,33 +41,45 @@
     </div>
 
     <div id="analytics" class="tab-content">
-        <h1 class="text-2xl font-black italic mb-6 uppercase">Analytics</h1>
-        <div class="card p-6 mb-4">
+        <h1 class="text-2xl font-black italic mb-6 uppercase text-amber-500">Analytics</h1>
+        <div class="card p-8 mb-4 border-t-2 border-amber-500/20 text-center">
             <p class="text-[10px] opacity-40 uppercase font-black mb-2">Total Estimated Revenue</p>
-            <h2 class="text-4xl font-black text-amber-500 italic">₹ <span id="totalRev">0</span></h2>
+            <h2 class="text-5xl font-black italic">₹ <span id="totalRev">0</span></h2>
         </div>
-        <p class="text-[10px] opacity-30 text-center italic mt-10">Analytics update based on Sponsorships locked below.</p>
     </div>
 
     <div id="wallet" class="tab-content">
         <h1 class="text-2xl font-black italic mb-4 uppercase">Sponsorships</h1>
-        <div class="card p-4 mb-6 border-t-2 border-amber-500/30">
-            <input type="text" id="brandName" placeholder="Brand Name" class="w-full p-2 bg-transparent border-b border-white/10 mb-2 text-xs outline-none">
-            <input type="number" id="brandAmt" placeholder="Amount ₹" class="w-full p-2 bg-transparent border-b border-white/10 mb-3 text-xs outline-none">
-            <button onclick="addDeal()" class="w-full py-2 bg-amber-500 text-black text-[10px] font-black rounded-lg uppercase">Add New Deal</button>
+        <div class="card p-5 mb-6 border-t-2 border-amber-500/30">
+            <input type="text" id="brandName" placeholder="Brand Name" class="w-full p-3 bg-white/5 rounded-xl mb-2 text-xs outline-none">
+            <input type="number" id="brandAmt" placeholder="Amount ₹" class="w-full p-3 bg-white/5 rounded-xl mb-4 text-xs outline-none">
+            <button onclick="addDeal()" class="w-full py-3 bg-amber-500 text-black text-[10px] font-black rounded-xl uppercase shadow-lg shadow-amber-500/20">Add New Deal</button>
         </div>
         <div id="dealList" class="space-y-3"></div>
     </div>
 
     <div id="settings" class="tab-content">
-        <h1 class="text-2xl font-black italic mb-6 uppercase">System</h1>
-        <div class="card p-6 text-center">
-            <div class="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
-                <i class="fas fa-user-tie text-2xl text-amber-500"></i>
+        <h1 class="text-2xl font-black italic mb-6 uppercase">Settings</h1>
+        <div class="card p-6 space-y-4">
+            <div class="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                <p class="text-[8px] font-black uppercase text-amber-500">Admin Email</p>
+                <p class="text-xs font-bold">magicalkhagesh888@gmail.com</p>
             </div>
-            <p class="text-xs font-black tracking-widest uppercase">Nexa AI Admin</p>
-            <p class="text-[10px] opacity-40 mt-1">magicalkhagesh888@gmail.com</p>
-            <button onclick="localStorage.clear(); location.reload();" class="mt-10 text-[9px] text-rose-500 font-bold uppercase border border-rose-500/20 px-4 py-2 rounded-lg">Reset All Data</button>
+            
+            <div class="pt-4 space-y-3">
+                <h4 class="text-[10px] font-black uppercase opacity-40 tracking-widest ml-1">Data & Security</h4>
+                <button onclick="exportBackup()" class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center hover:bg-white/10 transition">
+                    <span class="text-xs font-bold uppercase tracking-wider">Export Backup</span>
+                    <i class="fas fa-download text-amber-500"></i>
+                </button>
+                <label class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-white/10 transition">
+                    <span class="text-xs font-bold uppercase tracking-wider">Import Backup</span>
+                    <i class="fas fa-upload text-cyan-500"></i>
+                    <input type="file" id="importFile" class="hidden" onchange="importBackup(this)">
+                </label>
+            </div>
+
+            <button onclick="localStorage.clear(); location.reload();" class="w-full mt-6 py-3 text-[9px] text-rose-500 font-bold uppercase border border-rose-500/20 rounded-xl">Hard Reset System</button>
         </div>
     </div>
 
@@ -108,16 +120,32 @@
         }
 
         function deleteDeal(id) {
-            creatorDB.deals = creatorDB.deals.filter(d => d.id !== id);
-            save();
+            if(confirm('Kya aap ise delete karna chahte hain?')) {
+                creatorDB.deals = creatorDB.deals.filter(d => d.id !== id);
+                save();
+            }
         }
 
-        function editDeal(id) {
-            const d = creatorDB.deals.find(x => x.id === id);
-            document.getElementById('brandName').value = d.name;
-            document.getElementById('brandAmt').value = d.amt;
-            deleteDeal(id);
-            switchTab('wallet', document.querySelectorAll('.nav-btn')[2]);
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(creatorDB));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "nexa_creator_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            alert("Backup File Downloaded! Ise safe rakhein.");
+        }
+
+        function importBackup(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                creatorDB = JSON.parse(e.target.result);
+                save();
+                alert("Data Successfully Restored!");
+            };
+            reader.readAsText(file);
         }
 
         function save() {
@@ -132,15 +160,12 @@
             creatorDB.deals.forEach(d => {
                 total += d.amt;
                 list.innerHTML += `
-                    <div class="card p-4 flex justify-between items-center animate-fadeIn">
+                    <div class="card p-5 flex justify-between items-center animate-fadeIn border-l-4 border-amber-500">
                         <div>
-                            <p class="text-xs font-black italic">${d.name}</p>
-                            <p class="text-amber-500 font-bold text-sm">₹${d.amt.toLocaleString()}</p>
+                            <p class="text-xs font-black italic tracking-wide">${d.name}</p>
+                            <p class="text-amber-500 font-bold text-sm">₹${d.amt.toLocaleString('en-IN')}</p>
                         </div>
-                        <div class="flex gap-4">
-                            <button onclick="editDeal(${d.id})" class="text-blue-400 text-xs"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteDeal(${d.id})" class="text-rose-500 text-xs"><i class="fas fa-trash"></i></button>
-                        </div>
+                        <button onclick="deleteDeal(${d.id})" class="text-rose-500 opacity-40 hover:opacity-100"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
             });
@@ -150,7 +175,7 @@
         function sendTask() {
             const name = document.getElementById('edName').value;
             const task = document.getElementById('edTask').value;
-            if(!name || !task) return alert("Details bharo!");
+            if(!name || !task) return;
             window.open(`https://wa.me/?text=*Nexa Studio Task*%0A*Editor:* ${name}%0A*Task:* ${task}`);
         }
 
@@ -158,5 +183,4 @@
         render();
     </script>
 </body>
-                                                                                      </html>
-                                                                                      
+</html>
