@@ -3,124 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Studio Ultra | Khagesh ai-nexa</title>
+    <title>Creator Studio Ultra | Nexa AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --main: #050505; --accent: #f59e0b; }
-        .light-mode { --main: #f8fafc; --accent: #d97706; }
-        body { background: var(--main); color: white; font-family: 'Inter', sans-serif; transition: 0.5s; }
-        .light-mode { color: #1e293b; }
+        :root { --bg: #050505; --accent: #f59e0b; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 30px; }
-        .light-mode .card { background: white; border-color: #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .neon-border { border-left: 4px solid var(--accent); }
-        .qr-box canvas, .qr-box img { margin: 0 auto; border-radius: 10px; }
+        .active-nav { color: #f59e0b !important; transform: scale(1.2); text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-40">
 
-    <div class="flex justify-between items-center mb-8 pt-4">
-        <button onclick="document.body.classList.toggle('light-mode')" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10"><i class="fas fa-moon"></i></button>
-        <div id="clock" class="text-[10px] font-black tracking-[4px] opacity-40">21:06:00</div>
-        <button onclick="backupData()" class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20"><i class="fas fa-database"></i></button>
+    <div class="flex justify-between items-center mb-6 pt-4">
+        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-black text-black text-xs">N</div>
+        <div id="liveTime" class="text-[10px] font-black tracking-widest opacity-40 uppercase">00:00:00</div>
+        <i class="fas fa-signal text-amber-500 text-xs"></i>
     </div>
 
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-black italic tracking-tighter uppercase">Nexa <span class="text-amber-500">Creator Ultra</span></h1>
-        <p class="text-[7px] font-bold opacity-30 tracking-[8px] uppercase mt-1">Khagesh ai-nexa Ecosystem</p>
-    </div>
-
-    <div class="card p-6 mb-8 neon-border">
-        <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500"><i class="fas fa-qrcode mr-2"></i> Instant Promo QR</h3>
-        <div id="qrcode" class="qr-box mb-6 flex justify-center bg-white p-2 w-32 h-32 mx-auto rounded-xl"></div>
-        <input type="text" id="qrInput" oninput="generateQR()" placeholder="Paste YouTube Link / Social Link" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs text-center mb-3">
-        <p class="text-[8px] text-center opacity-40">QR automatically updates as you type</p>
-    </div>
-
-    <div class="card p-6 mb-8">
-        <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500"><i class="fas fa-paint-brush mr-2"></i> Video & Thumbnail Planner</h3>
-        <div class="space-y-3">
-            <input type="text" id="vTitle" placeholder="Video Title" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs font-bold">
-            <input type="text" id="tIdea" placeholder="Thumbnail Idea (e.g. Shocked Face + Red Arrow)" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs">
-            <button onclick="saveIdea()" class="w-full bg-amber-500 text-black py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-500/20">Lock Strategy</button>
+    <div id="home" class="tab-content tab-active">
+        <h1 class="text-2xl font-black italic mb-6">DASHBOARD</h1>
+        <div class="card p-6 mb-6">
+            <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500">Instant QR</h3>
+            <div id="qrcode" class="flex justify-center bg-white p-2 w-32 h-32 mx-auto rounded-xl mb-4"></div>
+            <input type="text" id="qrInput" oninput="generateQR()" placeholder="Paste Link" class="w-full p-3 rounded-xl bg-black/40 border border-white/5 outline-none text-xs text-center">
+        </div>
+        <div class="card p-6 border-l-4 border-amber-500">
+            <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500">Editor Task Sync</h3>
+            <input type="text" id="edName" placeholder="Editor Name" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs font-bold mb-3">
+            <textarea id="edTask" placeholder="Work details..." class="w-full p-3 h-16 rounded-xl bg-black/20 border border-white/10 outline-none text-xs mb-3"></textarea>
+            <button onclick="sendToWA()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-[10px] uppercase">Send Task via WhatsApp</button>
         </div>
     </div>
 
-    <div class="card p-6 mb-8 neon-border">
-        <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500"><i class="fas fa-user-edit mr-2"></i> Editor Task Sync</h3>
-        <div class="space-y-3">
-            <input type="text" id="edName" placeholder="Editor Name" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs font-bold">
-            <textarea id="edTask" placeholder="Work details..." class="w-full p-3 h-16 rounded-xl bg-black/20 border border-white/10 outline-none text-xs"></textarea>
-            <button onclick="sendToEditor()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Send Task via WhatsApp</button>
+    <div id="analytics" class="tab-content">
+        <h1 class="text-2xl font-black italic mb-6">ANALYTICS</h1>
+        <div class="card p-6 mb-4">
+            <p class="text-[10px] opacity-40 uppercase font-black mb-2">Estimated Revenue</p>
+            <h2 class="text-4xl font-black text-amber-500 italic">₹ 1,24,500</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="card p-4 text-center">
+                <p class="text-[8px] opacity-40 uppercase font-black">CPM</p>
+                <p class="text-xl font-black">₹450</p>
+            </div>
+            <div class="card p-4 text-center">
+                <p class="text-[8px] opacity-40 uppercase font-black">Retention</p>
+                <p class="text-xl font-black">68%</p>
+            </div>
         </div>
     </div>
 
-    <div id="strategyList" class="space-y-4"></div>
-
-    <footer class="fixed bottom-0 left-0 w-full p-6 bg-inherit backdrop-blur-xl border-t border-white/5 text-center">
-        <div class="flex justify-around mb-4 opacity-50 text-xs">
-            <i class="fas fa-home text-amber-500"></i>
-            <i class="fas fa-chart-line"></i>
-            <i class="fas fa-wallet"></i>
-            <i class="fas fa-cog"></i>
+    <div id="wallet" class="tab-content">
+        <h1 class="text-2xl font-black italic mb-6">SPONSORSHIPS</h1>
+        <div class="card p-6 mb-4 flex justify-between items-center">
+            <div>
+                <p class="text-xs font-black italic">WinZO Games</p>
+                <p class="text-[8px] opacity-40 uppercase">Pending Payment</p>
+            </div>
+            <p class="text-amber-500 font-black">₹45,000</p>
         </div>
-        <p class="text-[9px] font-black italic italic">CREATOR STUDIO PRO MAX v5.0</p>
-        <p class="text-[7px] opacity-30 mt-1 uppercase tracking-widest">User: 8882737014 | Nexa AI</p>
-    </footer>
+        <div class="card p-6 flex justify-between items-center">
+            <div>
+                <p class="text-xs font-black italic">RedBull India</p>
+                <p class="text-[8px] opacity-40 uppercase">Received</p>
+            </div>
+            <p class="text-emerald-500 font-black">₹80,000</p>
+        </div>
+    </div>
+
+    <div id="settings" class="tab-content">
+        <h1 class="text-2xl font-black italic mb-6">SYSTEM</h1>
+        <div class="card p-6 space-y-4">
+            <button onclick="alert('Backup Successful!')" class="w-full p-4 bg-white/5 rounded-2xl text-left flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-widest">Backup Cloud</span>
+                <i class="fas fa-cloud-upload-alt text-amber-500"></i>
+            </button>
+            <div class="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                <p class="text-[8px] font-black uppercase text-amber-500">User ID</p>
+                <p class="text-xs font-bold">8882737014 | Nexa AI</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] card p-5 flex justify-around items-center rounded-[35px] shadow-2xl">
+        <button onclick="switchTab('home', this)" class="nav-btn active-nav transition-all duration-300"><i class="fas fa-home text-lg"></i></button>
+        <button onclick="switchTab('analytics', this)" class="nav-btn transition-all duration-300 opacity-30"><i class="fas fa-chart-line text-lg"></i></button>
+        <button onclick="switchTab('wallet', this)" class="nav-btn transition-all duration-300 opacity-30"><i class="fas fa-wallet text-lg"></i></button>
+        <button onclick="switchTab('settings', this)" class="nav-btn transition-all duration-300 opacity-30"><i class="fas fa-cog text-lg"></i></button>
+    </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('nexa_creator_ultra')) || { ideas: [] };
-
-        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-IN', {hour12: false}); }
+        function updateClock() { document.getElementById('liveTime').innerText = new Date().toLocaleTimeString('en-IN', {hour12: false}); }
         setInterval(updateClock, 1000); updateClock();
 
         function generateQR() {
             const val = document.getElementById('qrInput').value || "Nexa AI";
             document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), { text: val, width: 110, height: 110, colorDark: "#000000", colorLight: "#ffffff" });
+            new QRCode(document.getElementById('qrcode'), { text: val, width: 120, height: 120 });
         }
 
-        function saveIdea() {
-            const title = document.getElementById('vTitle').value;
-            const thumb = document.getElementById('tIdea').value;
-            if(!title) return alert("Title dalo bhai!");
-            db.ideas.unshift({ title, thumb, id: Date.now() });
-            saveDB();
-            document.getElementById('vTitle').value = "";
-            document.getElementById('tIdea').value = "";
+        function switchTab(tabId, btn) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('tab-active'));
+            // Show selected tab
+            document.getElementById(tabId).classList.add('tab-active');
+            
+            // Update Nav Icons
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active-nav');
+                b.classList.add('opacity-30');
+            });
+            btn.classList.add('active-nav');
+            btn.classList.remove('opacity-30');
         }
 
-        function sendToEditor() {
+        function sendToWA() {
             const name = document.getElementById('edName').value;
             const task = document.getElementById('edTask').value;
             if(!name || !task) return alert("Details bharo!");
-            const msg = `*NEXA CREATOR TASK*%0A*Editor:* ${name}%0A*Task:* ${task}%0A_Status: Priority_`;
-            window.open(`https://wa.me/?text=${msg}`);
+            window.open(`https://wa.me/?text=*TASK:* ${task}%0A*EDITOR:* ${name}`);
         }
-
-        function render() {
-            const list = document.getElementById('strategyList');
-            list.innerHTML = '<h4 class="text-[10px] font-black uppercase opacity-30 ml-2 mb-4">Saved Blueprints</h4>';
-            db.ideas.forEach(item => {
-                list.innerHTML += `
-                    <div class="card p-4 flex justify-between items-center border-l-4 border-amber-500 animate-pulse-once">
-                        <div>
-                            <p class="text-xs font-black italic text-amber-500">${item.title}</p>
-                            <p class="text-[8px] opacity-60 uppercase">${item.thumb}</p>
-                        </div>
-                        <button onclick="deleteIdea(${item.id})" class="text-rose-500 text-xs"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-            });
-        }
-
-        function deleteIdea(id) { db.ideas = db.ideas.filter(i => i.id !== id); saveDB(); }
-        function saveDB() { localStorage.setItem('nexa_creator_ultra', JSON.stringify(db)); render(); }
-        function backupData() { alert("Data backed up to Nexa Cloud! Business Safe."); }
 
         generateQR();
-        render();
     </script>
 </body>
 </html>
