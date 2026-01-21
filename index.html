@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Studio Pro Max | Khagesh ai-nexa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --main: #0f172a; --glow: #f59e0b; }
+        .light-mode { --main: #f8fafc; --glow: #d97706; }
+        body { background: var(--main); color: white; font-family: sans-serif; transition: 0.4s; }
+        .light-mode { color: #1e293b; }
+        .cyber-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 28px; }
+        .light-mode .cyber-card { background: white; border-color: #e2e8f0; }
+        .glow-btn { background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    </style>
+</head>
+<body class="p-4 max-w-md mx-auto pb-32">
+
+    <div class="flex justify-between items-center mb-8 pt-4">
+        <button onclick="document.body.classList.toggle('light-mode')" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10"><i class="fas fa-sun"></i></button>
+        <div id="clock" class="text-xs font-black tracking-widest text-amber-500">00:00:00</div>
+        <button onclick="window.location.href='tel:8882737014'" class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20"><i class="fas fa-phone"></i></button>
+    </div>
+
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-black italic italic tracking-tighter uppercase">Nexa <span class="text-amber-500">Studio Pro</span></h1>
+        <p class="text-[7px] font-bold opacity-40 tracking-[6px] uppercase mt-1">Creator Ecosystem by Khagesh ai-nexa</p>
+    </div>
+
+    <div class="cyber-card p-6 mb-8 border-l-4 border-amber-500">
+        <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500"><i class="fas fa-users-cog mr-2"></i> Editor Task Manager</h3>
+        <div class="space-y-3">
+            <input type="text" id="edName" placeholder="Editor Name (e.g. Rahul)" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs font-bold">
+            <textarea id="edTask" placeholder="Assign Task (e.g. Edit Vlog #56 with subtitles)" class="w-full p-3 h-16 rounded-xl bg-black/20 border border-white/10 outline-none text-xs"></textarea>
+            <button onclick="assignTask()" class="w-full glow-btn py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Assign & Send to WA</button>
+        </div>
+    </div>
+
+    <div id="taskList" class="space-y-4 mb-8"></div>
+
+    <footer class="fixed bottom-0 left-0 w-full p-6 bg-inherit backdrop-blur-md text-center border-t border-amber-500/10">
+        <p class="text-[8px] font-bold opacity-30 tracking-[4px] uppercase mb-1">Elite Creator Suite</p>
+        <p class="text-xs font-black italic">Khagesh ai-nexa | 8882737014</p>
+    </footer>
+
+    <script>
+        let studioDB = JSON.parse(localStorage.getItem('nexa_studio_v2')) || { tasks: [] };
+
+        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-IN', {hour12: false}); }
+        setInterval(updateClock, 1000); updateClock();
+
+        function assignTask() {
+            const name = document.getElementById('edName').value;
+            const task = document.getElementById('edTask').value;
+            if(!name || !task) return;
+
+            const newTask = { id: Date.now(), name, task, status: 'Pending' };
+            studioDB.tasks.unshift(newTask);
+            
+            // WhatsApp Message Logic
+            const waMsg = `*NEXA STUDIO TASK ASSIGNED*%0A--------------------------%0A*To:* ${name}%0A*Task:* ${task}%0A*Status:* Urgent%0A--------------------------%0A_Sent via Nexa Creator Studio_`;
+            window.open(`https://wa.me/?text=${waMsg}`);
+
+            save();
+            document.getElementById('edName').value = '';
+            document.getElementById('edTask').value = '';
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            container.innerHTML = '<h3 class="text-[10px] font-black uppercase opacity-40 ml-2 mb-4 tracking-widest italic">Live Assignments</h3>';
+            studioDB.tasks.forEach(t => {
+                container.innerHTML += `
+                    <div class="cyber-card p-4 flex justify-between items-center border-r-4 ${t.status === 'Done' ? 'border-emerald-500' : 'border-amber-500'}">
+                        <div class="flex-1">
+                            <p class="text-[10px] font-black text-amber-500 uppercase">${t.name}</p>
+                            <p class="text-xs italic opacity-80">${t.task}</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="toggleTask(${t.id})" class="text-emerald-500"><i class="fas fa-check-circle"></i></button>
+                            <button onclick="deleteTask(${t.id})" class="text-rose-500"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleTask(id) {
+            const t = studioDB.tasks.find(x => x.id === id);
+            t.status = t.status === 'Done' ? 'Pending' : 'Done';
+            save();
+        }
+
+        function deleteTask(id) {
+            studioDB.tasks = studioDB.tasks.filter(x => x.id !== id);
+            save();
+        }
+
+        function save() {
+            localStorage.setItem('nexa_studio_v2', JSON.stringify(studioDB));
+            renderTasks();
+        }
+
+        renderTasks();
+    </script>
+</body>
+</html>
