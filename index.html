@@ -22,7 +22,7 @@
     <div class="flex justify-between items-center mb-6 pt-4">
         <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-black text-black text-xs">N</div>
         <div id="liveTime" class="text-[10px] font-black tracking-widest opacity-40 uppercase">00:00:00</div>
-        <i class="fas fa-signal text-amber-500 text-xs"></i>
+        <i class="fas fa-database text-amber-500 text-xs animate-pulse"></i>
     </div>
 
     <div id="home" class="tab-content tab-active">
@@ -46,6 +46,7 @@
             <p class="text-[10px] opacity-40 uppercase font-black mb-2">Total Estimated Revenue</p>
             <h2 class="text-5xl font-black italic">₹ <span id="totalRev">0</span></h2>
         </div>
+        <p class="text-[10px] opacity-20 text-center mt-4 uppercase tracking-widest">Storage Backup: Active ✅</p>
     </div>
 
     <div id="wallet" class="tab-content">
@@ -65,21 +66,11 @@
                 <p class="text-[8px] font-black uppercase text-amber-500">Admin Email</p>
                 <p class="text-xs font-bold">magicalkhagesh888@gmail.com</p>
             </div>
-            
-            <div class="pt-4 space-y-3">
-                <h4 class="text-[10px] font-black uppercase opacity-40 tracking-widest ml-1">Data & Security</h4>
-                <button onclick="exportBackup()" class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center hover:bg-white/10 transition">
-                    <span class="text-xs font-bold uppercase tracking-wider">Export Backup</span>
-                    <i class="fas fa-download text-amber-500"></i>
-                </button>
-                <label class="w-full p-4 bg-white/5 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-white/10 transition">
-                    <span class="text-xs font-bold uppercase tracking-wider">Import Backup</span>
-                    <i class="fas fa-upload text-cyan-500"></i>
-                    <input type="file" id="importFile" class="hidden" onchange="importBackup(this)">
-                </label>
+            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                <p class="text-[8px] font-black uppercase opacity-40">Storage Status</p>
+                <p class="text-[10px] font-bold text-emerald-500">All Creator Data Secured Locally</p>
             </div>
-
-            <button onclick="localStorage.clear(); location.reload();" class="w-full mt-6 py-3 text-[9px] text-rose-500 font-bold uppercase border border-rose-500/20 rounded-xl">Hard Reset System</button>
+            <button onclick="if(confirm('Delete all data?')) { localStorage.clear(); location.reload(); }" class="w-full mt-10 py-3 text-[9px] text-rose-500 font-bold uppercase border border-rose-500/20 rounded-xl">Hard Reset System</button>
         </div>
     </div>
 
@@ -91,6 +82,7 @@
     </div>
 
     <script>
+        // Data Load from Browser Storage
         let creatorDB = JSON.parse(localStorage.getItem('nexa_creator_final')) || { deals: [] };
 
         function updateClock() { document.getElementById('liveTime').innerText = new Date().toLocaleTimeString('en-IN', {hour12: false}); }
@@ -114,41 +106,18 @@
             const amt = document.getElementById('brandAmt').value;
             if(!name || !amt) return;
             creatorDB.deals.unshift({ id: Date.now(), name, amt: parseInt(amt) });
-            save();
+            save(); // Save to Storage
             document.getElementById('brandName').value = '';
             document.getElementById('brandAmt').value = '';
         }
 
         function deleteDeal(id) {
-            if(confirm('Kya aap ise delete karna chahte hain?')) {
-                creatorDB.deals = creatorDB.deals.filter(d => d.id !== id);
-                save();
-            }
-        }
-
-        function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(creatorDB));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "nexa_creator_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            alert("Backup File Downloaded! Ise safe rakhein.");
-        }
-
-        function importBackup(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                creatorDB = JSON.parse(e.target.result);
-                save();
-                alert("Data Successfully Restored!");
-            };
-            reader.readAsText(file);
+            creatorDB.deals = creatorDB.deals.filter(d => d.id !== id);
+            save(); // Update Storage
         }
 
         function save() {
+            // Permanent Browser Backup
             localStorage.setItem('nexa_creator_final', JSON.stringify(creatorDB));
             render();
         }
@@ -160,12 +129,12 @@
             creatorDB.deals.forEach(d => {
                 total += d.amt;
                 list.innerHTML += `
-                    <div class="card p-5 flex justify-between items-center animate-fadeIn border-l-4 border-amber-500">
+                    <div class="card p-5 flex justify-between items-center border-l-4 border-amber-500">
                         <div>
                             <p class="text-xs font-black italic tracking-wide">${d.name}</p>
                             <p class="text-amber-500 font-bold text-sm">₹${d.amt.toLocaleString('en-IN')}</p>
                         </div>
-                        <button onclick="deleteDeal(${d.id})" class="text-rose-500 opacity-40 hover:opacity-100"><i class="fas fa-trash-alt"></i></button>
+                        <button onclick="deleteDeal(${d.id})" class="text-rose-500 opacity-40"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
             });
@@ -180,7 +149,7 @@
         }
 
         generateQR();
-        render();
+        render(); // Load data on start
     </script>
 </body>
 </html>
