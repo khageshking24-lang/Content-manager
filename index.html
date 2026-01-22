@@ -21,28 +21,27 @@
             <p id="liveTime" class="text-[9px] font-bold opacity-30 mt-1 uppercase tracking-widest"></p>
         </div>
         <div class="text-right">
-            <p class="text-[8px] font-black opacity-40 uppercase tracking-widest">Powered By</p>
-            <p class="text-[10px] font-bold text-violet-400 italic">Nexa AI</p>
+            <p class="text-[10px] font-bold text-violet-400 italic">Khagesh ai-nexa</p>
         </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-8">
         <div class="card p-4 text-center border-b-2 border-violet-500/30">
-            <p class="text-[8px] font-black opacity-40 uppercase">Active Projects</p>
+            <p class="text-[8px] font-black opacity-40 uppercase">Total Projects</p>
             <h2 id="projCount" class="text-2xl font-black italic">0</h2>
         </div>
         <div class="card p-4 text-center border-b-2 border-violet-500/30">
-            <p class="text-[8px] font-black opacity-40 uppercase">Total Revenue</p>
+            <p class="text-[8px] font-black opacity-40 uppercase">Total Income</p>
             <h2 id="totalRev" class="text-2xl font-black italic text-violet-400">₹0</h2>
         </div>
     </div>
 
-    <div class="card p-6 mb-8">
-        <input type="text" id="pName" placeholder="Video/Project Name" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none">
-        <input type="number" id="pPrice" placeholder="Deal Amount ₹" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none">
-        <textarea id="pDesc" placeholder="Project Details (e.g. 1 Reel, 2 Carousels, Scripting)" class="w-full p-3 h-16 bg-white/5 rounded-xl mb-4 text-xs border border-white/5 outline-none"></textarea>
+    <div class="card p-6 mb-8 shadow-xl shadow-violet-500/5">
+        <input type="text" id="pName" placeholder="Client/Project Name" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none focus:border-violet-500">
+        <input type="number" id="pPrice" placeholder="Project Amount ₹" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none focus:border-violet-500">
+        <textarea id="pDesc" placeholder="Project Details (e.g. 1 Video Editing, 3 Reels)" class="w-full p-3 h-16 bg-white/5 rounded-xl mb-4 text-xs border border-white/5 outline-none focus:border-violet-500"></textarea>
         
-        <button onclick="addProject()" class="w-full bg-violet-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-violet-500 transition">Log Project</button>
+        <button onclick="addProject()" class="w-full bg-violet-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-violet-500 transition shadow-lg shadow-violet-600/20">Log New Project</button>
     </div>
 
     <div id="pList" class="space-y-4"></div>
@@ -53,7 +52,7 @@
                 <a href="mailto:magicalkhagesh888@gmail.com" class="text-violet-400 text-xl"><i class="fas fa-envelope"></i></a>
                 <a href="https://www.instagram.com/khagesh_ai_nexa?igsh=a2tjMGRpMWRkeWtx" target="_blank" class="text-violet-400 text-xl"><i class="fab fa-instagram"></i></a>
             </div>
-            <button onclick="exportData()" class="text-[9px] font-black opacity-30 uppercase tracking-widest">Backup Cloud</button>
+            <button onclick="exportData()" class="text-[9px] font-black opacity-30 uppercase tracking-widest">Cloud Backup</button>
         </div>
     </div>
 
@@ -66,9 +65,17 @@
             const note = document.getElementById('pDesc').value;
 
             if(name && price) {
-                projects.unshift({ id: Date.now(), name, price: parseInt(price), note: note || "Work Project", time: new Date().toLocaleDateString() });
+                projects.unshift({ id: Date.now(), name, price: parseInt(price), note: note || "Work Order", time: new Date().toLocaleDateString() });
                 save();
                 clear();
+            }
+        }
+
+        function sendWhatsApp(name, price, note) {
+            const phone = prompt("Client ka WhatsApp number (91 ke sath):", "91");
+            if(phone) {
+                const msg = `*Nexa AI - Project Confirmation*%0A---------------------------%0A*Client:* ${name}%0A*Project:* ${note}%0A*Total Deal:* ₹${price}%0A---------------------------%0A_Working with Khagesh ai-nexa_`;
+                window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
             }
         }
 
@@ -86,12 +93,15 @@
                 list.innerHTML += `
                     <div class="card p-4 purple-border flex justify-between items-center">
                         <div class="flex-1">
-                            <p class="text-xs font-black uppercase italic">${p.name}</p>
+                            <p class="text-xs font-black uppercase italic tracking-tight">${p.name}</p>
                             <p class="text-[9px] opacity-40 italic">${p.note}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-black text-violet-400 font-mono italic">₹${p.price}</p>
-                            <button onclick="deleteP(${p.id})" class="text-[8px] text-rose-500/40 uppercase mt-1">Delete</button>
+                            <p class="text-sm font-black text-violet-400 italic mb-2">₹${p.price}</p>
+                            <div class="flex gap-3 justify-end">
+                                <button onclick="sendWhatsApp('${p.name}', ${p.price}, '${p.note}')" class="text-emerald-500 text-xs"><i class="fab fa-whatsapp"></i></button>
+                                <button onclick="deleteP(${p.id})" class="text-rose-500/30 text-[10px]"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                     </div>`;
             });
@@ -99,25 +109,9 @@
             document.getElementById('totalRev').innerText = '₹' + total.toLocaleString('en-IN');
         }
 
-        function deleteP(id) {
-            projects = projects.filter(x => x.id !== id);
-            save();
-        }
-
-        function clear() {
-            document.getElementById('pName').value = '';
-            document.getElementById('pPrice').value = '';
-            document.getElementById('pDesc').value = '';
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", "creator_backup.json");
-            dl.click();
-        }
-
+        function deleteP(id) { projects = projects.filter(x => x.id !== id); save(); }
+        function clear() { document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = ''; }
+        function exportData() { const blob = new Blob([JSON.stringify(projects)], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = "Creator_Studio_Backup.json"; a.click(); }
         setInterval(() => { document.getElementById('liveTime').innerText = new Date().toLocaleTimeString(); }, 1000);
         render();
     </script>
