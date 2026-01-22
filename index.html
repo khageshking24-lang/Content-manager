@@ -3,153 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Studio Ultra | Nexa AI</title>
+    <title>Creator Studio | Nexa AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #050505; --accent: #f59e0b; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; transition: 0.3s; }
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
-        .tab-active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 30px; }
-        .active-nav { color: #f59e0b !important; transform: scale(1.1); text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+        :root { --nexa: #8b5cf6; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; }
+        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; }
+        .purple-border { border-left: 4px solid var(--nexa); }
     </style>
 </head>
-<body class="p-4 max-w-md mx-auto pb-40">
+<body class="p-4 max-w-md mx-auto pb-32">
 
-    <div class="flex justify-between items-center mb-6 pt-4">
-        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-black text-black text-xs">N</div>
-        <div id="liveTime" class="text-[10px] font-black tracking-widest opacity-40 uppercase">00:00:00</div>
-        <i class="fas fa-database text-amber-500 text-xs animate-pulse"></i>
-    </div>
-
-    <div id="home" class="tab-content tab-active">
-        <h1 class="text-2xl font-black italic mb-6 uppercase">Dashboard</h1>
-        <div class="card p-6 mb-6">
-            <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500">Instant QR</h3>
-            <div id="qrcode" class="flex justify-center bg-white p-2 w-32 h-32 mx-auto rounded-xl mb-4"></div>
-            <input type="text" id="qrInput" oninput="generateQR()" placeholder="Paste YouTube Link" class="w-full p-3 rounded-xl bg-black/40 border border-white/5 outline-none text-xs text-center">
+    <div class="flex justify-between items-center mb-8 pt-4">
+        <div>
+            <h1 class="text-2xl font-black italic tracking-tighter uppercase text-violet-500">Creator <span class="text-white">Studio</span></h1>
+            <p id="liveTime" class="text-[9px] font-bold opacity-30 mt-1 uppercase tracking-widest"></p>
         </div>
-        <div class="card p-6 border-l-4 border-amber-500">
-            <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-amber-500">Editor Task Manager</h3>
-            <input type="text" id="edName" placeholder="Editor Name" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none text-xs font-bold mb-3">
-            <textarea id="edTask" placeholder="Work details..." class="w-full p-3 h-16 rounded-xl bg-black/20 border border-white/10 outline-none text-xs mb-3"></textarea>
-            <button onclick="sendTask()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black text-[10px] uppercase">Assign & Send WA</button>
+        <div class="text-right">
+            <p class="text-[8px] font-black opacity-40 uppercase tracking-widest">Powered By</p>
+            <p class="text-[10px] font-bold text-violet-400 italic">Nexa AI</p>
         </div>
     </div>
 
-    <div id="analytics" class="tab-content">
-        <h1 class="text-2xl font-black italic mb-6 uppercase text-amber-500">Analytics</h1>
-        <div class="card p-8 mb-4 border-t-2 border-amber-500/20 text-center">
-            <p class="text-[10px] opacity-40 uppercase font-black mb-2">Total Estimated Revenue</p>
-            <h2 class="text-5xl font-black italic">₹ <span id="totalRev">0</span></h2>
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="card p-4 text-center border-b-2 border-violet-500/30">
+            <p class="text-[8px] font-black opacity-40 uppercase">Active Projects</p>
+            <h2 id="projCount" class="text-2xl font-black italic">0</h2>
         </div>
-        <p class="text-[10px] opacity-20 text-center mt-4 uppercase tracking-widest">Storage Backup: Active ✅</p>
+        <div class="card p-4 text-center border-b-2 border-violet-500/30">
+            <p class="text-[8px] font-black opacity-40 uppercase">Total Revenue</p>
+            <h2 id="totalRev" class="text-2xl font-black italic text-violet-400">₹0</h2>
+        </div>
     </div>
 
-    <div id="wallet" class="tab-content">
-        <h1 class="text-2xl font-black italic mb-4 uppercase">Sponsorships</h1>
-        <div class="card p-5 mb-6 border-t-2 border-amber-500/30">
-            <input type="text" id="brandName" placeholder="Brand Name" class="w-full p-3 bg-white/5 rounded-xl mb-2 text-xs outline-none">
-            <input type="number" id="brandAmt" placeholder="Amount ₹" class="w-full p-3 bg-white/5 rounded-xl mb-4 text-xs outline-none">
-            <button onclick="addDeal()" class="w-full py-3 bg-amber-500 text-black text-[10px] font-black rounded-xl uppercase shadow-lg shadow-amber-500/20">Add New Deal</button>
-        </div>
-        <div id="dealList" class="space-y-3"></div>
+    <div class="card p-6 mb-8">
+        <input type="text" id="pName" placeholder="Video/Project Name" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none">
+        <input type="number" id="pPrice" placeholder="Deal Amount ₹" class="w-full p-3 bg-white/5 rounded-xl mb-3 text-xs border border-white/5 outline-none">
+        <textarea id="pDesc" placeholder="Project Details (e.g. 1 Reel, 2 Carousels, Scripting)" class="w-full p-3 h-16 bg-white/5 rounded-xl mb-4 text-xs border border-white/5 outline-none"></textarea>
+        
+        <button onclick="addProject()" class="w-full bg-violet-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-violet-500 transition">Log Project</button>
     </div>
 
-    <div id="settings" class="tab-content">
-        <h1 class="text-2xl font-black italic mb-6 uppercase">Settings</h1>
-        <div class="card p-6 space-y-4">
-            <div class="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
-                <p class="text-[8px] font-black uppercase text-amber-500">Admin Email</p>
-                <p class="text-xs font-bold">magicalkhagesh888@gmail.com</p>
+    <div id="pList" class="space-y-4"></div>
+
+    <div class="fixed bottom-0 left-0 w-full p-6 bg-black/90 backdrop-blur-xl border-t border-white/5">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex gap-6">
+                <a href="mailto:magicalkhagesh888@gmail.com" class="text-violet-400 text-xl"><i class="fas fa-envelope"></i></a>
+                <a href="https://www.instagram.com/khagesh_ai_nexa?igsh=a2tjMGRpMWRkeWtx" target="_blank" class="text-violet-400 text-xl"><i class="fab fa-instagram"></i></a>
             </div>
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-[8px] font-black uppercase opacity-40">Storage Status</p>
-                <p class="text-[10px] font-bold text-emerald-500">All Creator Data Secured Locally</p>
-            </div>
-            <button onclick="if(confirm('Delete all data?')) { localStorage.clear(); location.reload(); }" class="w-full mt-10 py-3 text-[9px] text-rose-500 font-bold uppercase border border-rose-500/20 rounded-xl">Hard Reset System</button>
+            <button onclick="exportData()" class="text-[9px] font-black opacity-30 uppercase tracking-widest">Backup Cloud</button>
         </div>
-    </div>
-
-    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] card p-5 flex justify-around items-center rounded-[35px] shadow-2xl">
-        <button onclick="switchTab('home', this)" class="nav-btn active-nav"><i class="fas fa-home text-lg"></i></button>
-        <button onclick="switchTab('analytics', this)" class="nav-btn opacity-30"><i class="fas fa-chart-line text-lg"></i></button>
-        <button onclick="switchTab('wallet', this)" class="nav-btn opacity-30"><i class="fas fa-wallet text-lg"></i></button>
-        <button onclick="switchTab('settings', this)" class="nav-btn opacity-30"><i class="fas fa-cog text-lg"></i></button>
     </div>
 
     <script>
-        // Data Load from Browser Storage
-        let creatorDB = JSON.parse(localStorage.getItem('nexa_creator_final')) || { deals: [] };
+        let projects = JSON.parse(localStorage.getItem('nexa_creator_db')) || [];
 
-        function updateClock() { document.getElementById('liveTime').innerText = new Date().toLocaleTimeString('en-IN', {hour12: false}); }
-        setInterval(updateClock, 1000); updateClock();
+        function addProject() {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const note = document.getElementById('pDesc').value;
 
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('tab-active'));
-            document.getElementById(tabId).classList.add('tab-active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('active-nav'); b.classList.add('opacity-30'); });
-            btn.classList.add('active-nav'); btn.classList.remove('opacity-30');
-        }
-
-        function generateQR() {
-            const val = document.getElementById('qrInput').value || "Nexa AI";
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), { text: val, width: 120, height: 120 });
-        }
-
-        function addDeal() {
-            const name = document.getElementById('brandName').value;
-            const amt = document.getElementById('brandAmt').value;
-            if(!name || !amt) return;
-            creatorDB.deals.unshift({ id: Date.now(), name, amt: parseInt(amt) });
-            save(); // Save to Storage
-            document.getElementById('brandName').value = '';
-            document.getElementById('brandAmt').value = '';
-        }
-
-        function deleteDeal(id) {
-            creatorDB.deals = creatorDB.deals.filter(d => d.id !== id);
-            save(); // Update Storage
+            if(name && price) {
+                projects.unshift({ id: Date.now(), name, price: parseInt(price), note: note || "Work Project", time: new Date().toLocaleDateString() });
+                save();
+                clear();
+            }
         }
 
         function save() {
-            // Permanent Browser Backup
-            localStorage.setItem('nexa_creator_final', JSON.stringify(creatorDB));
+            localStorage.setItem('nexa_creator_db', JSON.stringify(projects));
             render();
         }
 
         function render() {
-            const list = document.getElementById('dealList');
+            const list = document.getElementById('pList');
             let total = 0;
             list.innerHTML = '';
-            creatorDB.deals.forEach(d => {
-                total += d.amt;
+            projects.forEach(p => {
+                total += p.price;
                 list.innerHTML += `
-                    <div class="card p-5 flex justify-between items-center border-l-4 border-amber-500">
-                        <div>
-                            <p class="text-xs font-black italic tracking-wide">${d.name}</p>
-                            <p class="text-amber-500 font-bold text-sm">₹${d.amt.toLocaleString('en-IN')}</p>
+                    <div class="card p-4 purple-border flex justify-between items-center">
+                        <div class="flex-1">
+                            <p class="text-xs font-black uppercase italic">${p.name}</p>
+                            <p class="text-[9px] opacity-40 italic">${p.note}</p>
                         </div>
-                        <button onclick="deleteDeal(${d.id})" class="text-rose-500 opacity-40"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
+                        <div class="text-right">
+                            <p class="text-sm font-black text-violet-400 font-mono italic">₹${p.price}</p>
+                            <button onclick="deleteP(${p.id})" class="text-[8px] text-rose-500/40 uppercase mt-1">Delete</button>
+                        </div>
+                    </div>`;
             });
-            document.getElementById('totalRev').innerText = total.toLocaleString('en-IN');
+            document.getElementById('projCount').innerText = projects.length;
+            document.getElementById('totalRev').innerText = '₹' + total.toLocaleString('en-IN');
         }
 
-        function sendTask() {
-            const name = document.getElementById('edName').value;
-            const task = document.getElementById('edTask').value;
-            if(!name || !task) return;
-            window.open(`https://wa.me/?text=*Nexa Studio Task*%0A*Editor:* ${name}%0A*Task:* ${task}`);
+        function deleteP(id) {
+            projects = projects.filter(x => x.id !== id);
+            save();
         }
 
-        generateQR();
-        render(); // Load data on start
+        function clear() {
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pDesc').value = '';
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "creator_backup.json");
+            dl.click();
+        }
+
+        setInterval(() => { document.getElementById('liveTime').innerText = new Date().toLocaleTimeString(); }, 1000);
+        render();
     </script>
 </body>
-</html>
+    </html>
+    
